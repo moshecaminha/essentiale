@@ -7,13 +7,14 @@ export default async function Home() {
   const sb = supabaseServer();
   const { data } = await sb
     .from("products")
-    .select("id,name,price_cents,stock_qty,image_url,description,category:categories(name)")
+    .select("id,name,slug,price_cents,stock_qty,image_url,description,category:categories(name)")
     .eq("active", true)
     .order("price_cents", { ascending: false });
 
   const products = (data ?? []).map((p: any) => ({
     id: p.id,
     n: p.name,
+    slug: p.slug,
     c: p.category?.name ?? "Outros",
     p: p.price_cents,
     s: p.stock_qty,

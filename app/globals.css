@@ -263,3 +263,55 @@ small { font-size: 11.5px; }
 /* miniatura de produto no admin */
 .row-thumb{ width:34px; height:34px; border-radius:8px; object-fit:cover; margin-right:10px; vertical-align:middle; border:1px solid var(--line); }
 .cell-name{ display:flex; align-items:center; }
+
+/* ===== cards clicáveis + botão WhatsApp ===== */
+.store .pcard{ position:relative; }
+.store .pcard-link{ display:flex; flex-direction:column; flex:1; color:inherit; }
+.store .pcard-body{ padding-bottom:8px; }
+.store .wa-fab{ position:absolute; top:12px; right:12px; z-index:3; width:36px; height:36px; border-radius:50%; background:#fff; color:var(--sage-deep); display:grid; place-items:center; border:1px solid var(--line); box-shadow:0 2px 8px rgba(46,53,43,0.12); transition:.15s; }
+.store .wa-fab:hover{ background:var(--sage-deep); color:#fff; }
+.store .pcard-foot{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; padding:0 16px 18px; }
+.store .pcard-foot .price{ margin-top:0; }
+.store .pcard-foot .btn.add{ width:auto; margin-top:0; padding:9px 14px; white-space:nowrap; }
+
+/* ===== página do produto ===== */
+.store .logo-link{ margin-right:auto; display:block; }
+.store .pdp{ max-width:1100px; margin:0 auto; padding:24px 32px 50px; }
+.store .pdp-back{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); margin-bottom:20px; }
+.store .pdp-back:hover{ color:var(--sage-deep); }
+.store .pdp-grid{ display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
+.store .pdp-art{ border-radius:18px; overflow:hidden; background:#fff; border:1px solid var(--line); aspect-ratio:1; position:relative; }
+.store .pdp-art img{ width:100%; height:100%; object-fit:cover; }
+.store .pdp-ph{ width:100%; height:100%; background:linear-gradient(160deg,#EEF1E9,#F6F4EE); }
+.store .pdp-info h1{ font-size:32px; line-height:1.1; margin:6px 0 14px; }
+.store .pdp-price{ font-family:'Fraunces',serif; font-size:30px; font-weight:600; }
+.store .pdp-parcela{ font-size:13px; color:var(--muted); margin-bottom:18px; }
+.store .pdp-desc{ font-size:15px; line-height:1.6; color:#4f574b; margin-bottom:22px; }
+.store .wa-btn{ background:var(--sage-deep); width:100%; justify-content:center; font-size:14.5px; padding:14px; }
+.store .pdp-hint{ display:block; text-align:center; font-size:11.5px; color:var(--muted); margin-top:8px; }
+.store .pdp-occ{ margin-top:26px; padding-top:22px; border-top:1px solid var(--line); }
+.store .occ-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.store .occ-tag{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; color:var(--sage-deep); background:rgba(141,165,133,0.12); border:1px solid rgba(141,165,133,0.3); padding:7px 13px; border-radius:20px; }
+.store .occ-tag svg{ color:var(--clay); }
+.store .pdp-trust{ display:flex; gap:20px; margin-top:22px; flex-wrap:wrap; }
+.store .pdp-trust span{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:#5a6356; }
+.store .pdp-trust svg{ color:var(--sage-deep); }
+
+/* ===== depoimentos ===== */
+.store .depos{ margin-top:54px; padding-top:40px; border-top:1px solid var(--line); }
+.store .depos-head{ text-align:center; margin-bottom:28px; }
+.store .depos-head h2{ font-size:26px; margin-top:6px; }
+.store .depos-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.store .depo{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:14px; margin:0; }
+.store .depo-q{ color:var(--sage); }
+.store .depo blockquote{ font-family:'Fraunces',serif; font-size:16px; line-height:1.5; font-style:italic; color:var(--ink); margin:0; flex:1; }
+.store .depo figcaption{ display:flex; flex-direction:column; }
+.store .depo figcaption strong{ font-size:13.5px; }
+.store .depo figcaption span{ font-size:11.5px; color:var(--muted); }
+.store .depos-note{ text-align:center; font-size:11.5px; color:var(--muted); margin-top:22px; font-style:italic; }
+
+@media (max-width:760px){
+  .store .pdp{ padding:18px 18px 40px; }
+  .store .pdp-grid{ grid-template-columns:1fr; gap:24px; }
+  .store .depos-grid{ grid-template-columns:1fr; }
+}
