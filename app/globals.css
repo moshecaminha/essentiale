@@ -315,3 +315,55 @@ small { font-size: 11.5px; }
   .store .pdp-grid{ grid-template-columns:1fr; gap:24px; }
   .store .depos-grid{ grid-template-columns:1fr; }
 }
+
+/* ===== cross-sell no carrinho ===== */
+.store .xsell{ border-top:1px solid var(--line); padding:14px 20px; }
+.store .xsell-head{ font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--sage-deep); display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.store .xsell-head span{ background:var(--clay); color:#fff; font-size:10px; padding:2px 7px; border-radius:10px; letter-spacing:0; }
+.store .xsell-item{ display:flex; align-items:center; gap:11px; padding:8px 0; }
+.store .xsell-art{ width:46px; height:46px; border-radius:9px; background:#EEF1E9; padding:8px; flex-shrink:0; }
+.store .xsell-art.has-img{ padding:0; overflow:hidden; }
+.store .xsell-art img{ width:100%; height:100%; object-fit:cover; }
+.store .xsell-info{ flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+.store .xsell-name{ font-size:12.5px; font-weight:500; line-height:1.3; }
+.store .xsell-price{ font-size:12px; color:var(--muted); }
+.store .xsell-price s{ opacity:.7; }
+.store .xsell-price strong{ color:var(--sage-deep); }
+.store .xsell-add{ width:30px; height:30px; border-radius:50%; background:var(--sage-deep); color:#fff; display:grid; place-items:center; flex-shrink:0; border:none; cursor:pointer; }
+.store .sum-line{ display:flex; justify-content:space-between; font-size:13px; color:#5a6356; margin-bottom:6px; }
+.store .sum-line.disc{ color:var(--sage-deep); font-weight:600; }
+
+/* ===== admin: gestão de produtos ===== */
+.summary{ display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.topbar{ justify-content:space-between; }
+.adm-btn{ display:inline-flex; align-items:center; gap:7px; background:var(--sage-deep); color:#fff; padding:9px 15px; border-radius:9px; font-size:13px; font-weight:600; border:none; cursor:pointer; text-decoration:none; transition:.15s; }
+.adm-btn:hover{ background:#4d6047; }
+.adm-btn.ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+.adm-btn.ghost:hover{ border-color:var(--sage); background:var(--paper); }
+.adm-btn.danger{ background:var(--surface); color:var(--clay); border:1px solid var(--line); }
+.adm-btn.danger:hover{ background:rgba(181,113,92,0.1); border-color:var(--clay); }
+.adm-btn.sm{ padding:7px 9px; font-size:12px; }
+.row-actions{ display:inline-flex; gap:6px; justify-content:flex-end; }
+.row-actions form{ display:inline; margin:0; }
+.table.pmanage .tr, .tr.pmanage{ grid-template-columns:2.2fr 1fr .8fr .7fr .9fr 1.4fr; }
+.back-link{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); }
+.back-link:hover{ color:var(--sage-deep); }
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.field.full{ grid-column:1 / -1; }
+.field label{ font-size:12px; font-weight:600; color:var(--muted); }
+.field input, .field select, .field textarea{ border:1px solid var(--line); border-radius:9px; padding:10px 12px; font-size:14px; font-family:inherit; background:var(--surface); color:var(--ink); }
+.field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--sage); outline-offset:0; border-color:var(--sage); }
+.field textarea{ min-height:90px; resize:vertical; }
+.field-check{ flex-direction:row; align-items:center; gap:9px; }
+.field-check input{ width:17px; height:17px; }
+.img-edit{ display:flex; align-items:flex-start; gap:16px; }
+.img-edit img{ width:84px; height:84px; border-radius:12px; object-fit:cover; border:1px solid var(--line); }
+.img-ph{ width:84px; height:84px; border-radius:12px; border:1px dashed var(--line); display:grid; place-items:center; font-size:11px; color:var(--muted); background:var(--paper); }
+.form-actions{ display:flex; gap:10px; margin-top:4px; }
+
+@media (max-width:920px){
+  .summary{ grid-template-columns:repeat(2,1fr); }
+  .form-grid{ grid-template-columns:1fr; }
+  .tr.pmanage{ grid-template-columns:1.6fr .7fr 1.2fr; }
+}

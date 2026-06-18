@@ -35,13 +35,24 @@ export default function Storefront({ products }: { products: Product[] }) {
   const [cartOpen, setCartOpen] = useState(false);
 
   const list = useMemo(() => cat === "Todos" ? products : products.filter((p) => p.c === cat), [cat, products]);
+  const [deals, setDeals] = useState<Record<string, boolean>>({});
   const add = (p: Product) => { setCart((c) => ({ ...c, [p.id]: (c[p.id] || 0) + 1 })); setCartOpen(true); };
   const inc = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
-  const dec = (id: string) => setCart((c) => { const q = (c[id] || 0) - 1; const n = { ...c }; if (q <= 0) delete n[id]; else n[id] = q; return n; });
+  const dec = (id: string) => setCart((c) => { const q = (c[id] || 0) - 1; const n = { ...c }; if (q <= 0) { delete n[id]; setDeals((d) => { const nd = { ...d }; delete nd[id]; return nd; }); } else n[id] = q; return n; });
+  const addDeal = (p: Product) => { setCart((c) => ({ ...c, [p.id]: (c[p.id] || 0) + 1 })); setDeals((d) => ({ ...d, [p.id]: true })); };
 
   const items = Object.entries(cart).map(([id, q]) => ({ ...products.find((p) => p.id === id)!, q }));
   const count = items.reduce((s, i) => s + i.q, 0);
   const subtotal = items.reduce((s, i) => s + i.p * i.q, 0);
+  const discount = items.reduce((s, i) => s + (deals[i.id] ? i.p * i.q * 0.05 : 0), 0);
+  const total = subtotal - discount;
+
+  // Sugestões de cross-sell: produtos mais baratos ainda não no carrinho
+  const suggestions = useMemo(() => {
+    const inCart = new Set(Object.keys(cart));
+    return products.filter((p) => !inCart.has(p.id) && p.s > 0).sort((a, b) => a.p - b.p).slice(0, 3);
+  }, [cart, products]);
+
   const goCat = (c: string) => { setCat(c); document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }); };
 
   return (
@@ -169,9 +180,24 @@ export default function Storefront({ products }: { products: Product[] }) {
                 </div>
               ))}
             </div>
+            <div className="xsell">
+              <div className="xsell-head">Aproveite e combine <span>5% OFF</span></div>
+              {suggestions.map((s) => (
+                <div className="xsell-item" key={s.id}>
+                  <div className={`xsell-art ${s.img ? "has-img" : ""}`}>{s.img ? <img src={s.img} alt={s.n} /> : <Motif cat={s.c} />}</div>
+                  <div className="xsell-info">
+                    <span className="xsell-name">{s.n}</span>
+                    <span className="xsell-price"><s>{brl(s.p)}</s> por <strong>{brl(s.p * 0.95)}</strong></span>
+                  </div>
+                  <button className="xsell-add" onClick={() => addDeal(s)} aria-label="Adicionar com desconto"><Plus size={15} /></button>
+                </div>
+              ))}
+            </div>
             <div className="drawer-foot">
               <div className="ship-note"><Truck size={14} /> Calcule o frete no checkout</div>
-              <div className="subtotal"><span>Subtotal</span><strong>{brl(subtotal)}</strong></div>
+              <div className="sum-line"><span>Subtotal</span><span>{brl(subtotal)}</span></div>
+              {discount > 0 && <div className="sum-line disc"><span>Desconto combinado (5%)</span><span>- {brl(discount)}</span></div>}
+              <div className="subtotal"><span>Total</span><strong>{brl(total)}</strong></div>
               <button className="btn full">Finalizar compra</button>
               <span className="coupon">Cupom CUPOM10 aplicável na primeira compra</span>
             </div>
