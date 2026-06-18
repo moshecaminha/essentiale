@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutGrid, Sparkles, Users, Megaphone, Package, Truck,
+  LayoutGrid, Sparkles, Users, Megaphone, Package, Truck, Store,
 } from "lucide-react";
 
 const NAV = [
-  { href: "/", label: "Visão geral", icon: LayoutGrid },
-  { href: "/inteligencia", label: "Inteligência", icon: Sparkles },
-  { href: "/clientes", label: "Clientes", icon: Users },
-  { href: "/campanhas", label: "Campanhas", icon: Megaphone },
-  { href: "/produtos", label: "Produtos e estoque", icon: Package },
-  { href: "/pedidos", label: "Pedidos", icon: Truck },
+  { href: "/admin", label: "Visão geral", icon: LayoutGrid },
+  { href: "/admin/inteligencia", label: "Inteligência", icon: Sparkles },
+  { href: "/admin/clientes", label: "Clientes", icon: Users },
+  { href: "/admin/campanhas", label: "Campanhas", icon: Megaphone },
+  { href: "/admin/produtos", label: "Produtos e estoque", icon: Package },
+  { href: "/admin/pedidos", label: "Pedidos", icon: Truck },
 ];
 
 export default function Sidebar() {
@@ -20,16 +20,13 @@ export default function Sidebar() {
   return (
     <aside className="side">
       <div className="brand">
-        <div className="brand-mark">EF</div>
-        <div className="brand-text">
-          <strong>Essentiale</strong>
-          <span>Inteligência Comercial</span>
-        </div>
+        <img src="/logo.png" alt="Essentiale Fragrance" className="brand-logo" />
       </div>
+      <div className="brand-sub">Inteligência Comercial</div>
       <nav className="nav-list">
         {NAV.map((n) => {
           const Icon = n.icon;
-          const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+          const active = n.href === "/admin" ? path === "/admin" : path.startsWith(n.href);
           return (
             <Link key={n.href} href={n.href} className={`nav-item ${active ? "active" : ""}`}>
               <Icon size={17} /> <span>{n.label}</span>
@@ -38,6 +35,7 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="side-foot">
+        <Link href="/" className="nav-item"><Store size={17} /> <span>Ver a loja</span></Link>
         <div className="owner">
           <span className="owner-av">EF</span>
           <span>Equipe Essentiale</span>

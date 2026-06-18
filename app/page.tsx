@@ -1,0 +1,23 @@
+import { supabaseServer } from "@/lib/supabaseServer";
+import Storefront from "@/components/Storefront";
+
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const sb = supabaseServer();
+  const { data } = await sb
+    .from("products")
+    .select("id,name,price_cents,stock_qty,category:categories(name)")
+    .eq("active", true)
+    .order("price_cents", { ascending: false });
+
+  const products = (data ?? []).map((p: any) => ({
+    id: p.id,
+    n: p.name,
+    c: p.category?.name ?? "Outros",
+    p: p.price_cents,
+    s: p.stock_qty,
+  }));
+
+  return <Storefront products={products} />;
+}
