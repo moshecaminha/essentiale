@@ -6,7 +6,7 @@ import {
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
 } from "lucide-react";
 
-type Product = { id: string; n: string; c: string; p: number; s: number };
+type Product = { id: string; n: string; c: string; p: number; s: number; img?: string | null; d?: string | null };
 
 const CATS = ["Todos", "Velas Aromáticas", "Difusores", "Home Sprays", "Sabonetes", "Essências", "Afetos & Cartões", "Bem-estar", "Kits & Atacado"];
 const NAV = ["Velas Aromáticas", "Difusores", "Home Sprays", "Afetos & Cartões", "Kits & Atacado"];
@@ -97,10 +97,14 @@ export default function Storefront({ products }: { products: Product[] }) {
             const out = p.s === 0;
             return (
               <article className={`pcard ${out ? "out" : ""}`} key={p.id}>
-                <div className="pcard-art"><Motif cat={p.c} />{out && <span className="tag-out">Esgotado</span>}</div>
+                <div className={`pcard-art ${p.img ? "has-img" : ""}`}>
+                  {p.img ? <img src={p.img} alt={p.n} loading="lazy" /> : <Motif cat={p.c} />}
+                  {out && <span className="tag-out">Esgotado</span>}
+                </div>
                 <div className="pcard-body">
                   <span className="pcard-cat">{p.c}</span>
                   <h3>{p.n}</h3>
+                  {p.d && <p className="pcard-desc">{p.d}</p>}
                   <div className="price">{brl(p.p)}</div>
                   <div className="parcela">{parcela(p.p)}</div>
                   <button className="btn add" disabled={out} onClick={() => add(p)}>{out ? "Indisponível" : <>Adicionar <Plus size={15} /></>}</button>
@@ -145,7 +149,7 @@ export default function Storefront({ products }: { products: Product[] }) {
             <div className="drawer-items">
               {items.map((i) => (
                 <div className="ditem" key={i.id}>
-                  <div className="ditem-art"><Motif cat={i.c} /></div>
+                  <div className={`ditem-art ${i.img ? "has-img" : ""}`}>{i.img ? <img src={i.img} alt={i.n} /> : <Motif cat={i.c} />}</div>
                   <div className="ditem-info">
                     <span className="ditem-name">{i.n}</span>
                     <span className="ditem-price">{brl(i.p)}</span>

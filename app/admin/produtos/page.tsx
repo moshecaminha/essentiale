@@ -9,6 +9,7 @@ type Product = {
   price_cents: number;
   stock_qty: number;
   low_stock_threshold: number;
+  image_url: string | null;
   category: { name: string } | null;
 };
 
@@ -16,7 +17,7 @@ export default async function Produtos() {
   const sb = supabaseServer();
   const { data: products = [] } = await sb
     .from("products")
-    .select("id,name,price_cents,stock_qty,low_stock_threshold,category:categories(name)")
+    .select("id,name,price_cents,stock_qty,low_stock_threshold,image_url,category:categories(name)")
     .order("name");
 
   const list = (products as unknown as Product[]) ?? [];
@@ -38,7 +39,10 @@ export default async function Produtos() {
           </div>
           {list.map((p) => (
             <div className="tr products" key={p.id}>
-              <span className="cell-name">{p.name}</span>
+              <span className="cell-name">
+                {p.image_url && <img src={p.image_url} alt="" className="row-thumb" />}
+                {p.name}
+              </span>
               <span className="cell-muted hide-sm">{p.category?.name ?? "—"}</span>
               <span className="ta-r cell-strong hide-sm">{brl(p.price_cents)}</span>
               <span className="ta-r">{p.stock_qty}</span>
