@@ -17,8 +17,9 @@ export default function BuyNowButton({ id, name, price, img, disabled }: { id: s
     if (i >= 0) cart[i].qty += 1;
     else cart.push({ id, n: name, p: price, img: img ?? null, qty: 1, deal: false });
     writeCart(cart);
-    track("buy_now", { productId: id, label: name, valueCents: price, cart });
-    router.push("/checkout");
+    track("add_to_cart", { productId: id, label: name, valueCents: price, cart });
+    // abre a loja com o carrinho lateral aberto (cross-sell + continuar comprando)
+    router.push("/?cart=1");
   };
 
   return (

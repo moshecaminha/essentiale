@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { waLink, WHATSAPP } from "@/lib/merch";
-import { writeCart, CartLine } from "@/lib/cart";
+import { readCart, writeCart, CartLine } from "@/lib/cart";
 import AccountMenu from "@/components/AccountMenu";
 import { track } from "@/lib/track";
 import {
@@ -49,17 +49,36 @@ export default function Storefront({ products }: { products: Product[] }) {
   const [deals, setDeals] = useState<Record<string, boolean>>({});
   const buildLines = (c: Record<string, number>, d: Record<string, boolean>): CartLine[] =>
     Object.entries(c).map(([id, q]) => { const p = products.find((x) => x.id === id)!; return { id, n: p.n, p: p.p, img: p.img ?? null, qty: q, deal: !!d[id] }; });
+
+  // carrega o carrinho salvo e abre o drawer quando vem do "Comprar agora"
+  useEffect(() => {
+    const saved = readCart();
+    if (saved.length) {
+      const c: Record<string, number> = {}; const d: Record<string, boolean> = {};
+      saved.forEach((l) => { if (products.find((p) => p.id === l.id)) { c[l.id] = l.qty; if (l.deal) d[l.id] = true; } });
+      setCart(c); setDeals(d);
+    }
+    try { if (new URLSearchParams(window.location.search).get("cart") === "1") setCartOpen(true); } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const persist = (c: Record<string, number>, d: Record<string, boolean>) => writeCart(buildLines(c, d));
+
   const add = (p: Product) => {
     const nc = { ...cart, [p.id]: (cart[p.id] || 0) + 1 };
-    setCart(nc); setCartOpen(true);
+    setCart(nc); setCartOpen(true); persist(nc, deals);
     track("add_to_cart", { productId: p.id, label: p.n, valueCents: p.p, cart: buildLines(nc, deals) });
   };
-  const inc = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
-  const dec = (id: string) => setCart((c) => { const q = (c[id] || 0) - 1; const n = { ...c }; if (q <= 0) { delete n[id]; setDeals((d) => { const nd = { ...d }; delete nd[id]; return nd; }); } else n[id] = q; return n; });
+  const inc = (id: string) => { const nc = { ...cart, [id]: (cart[id] || 0) + 1 }; setCart(nc); persist(nc, deals); };
+  const dec = (id: string) => {
+    const q = (cart[id] || 0) - 1; const nc = { ...cart }; const nd = { ...deals };
+    if (q <= 0) { delete nc[id]; delete nd[id]; } else nc[id] = q;
+    setCart(nc); setDeals(nd); persist(nc, nd);
+  };
   const addDeal = (p: Product) => {
     const nc = { ...cart, [p.id]: (cart[p.id] || 0) + 1 };
     const nd = { ...deals, [p.id]: true };
-    setCart(nc); setDeals(nd);
+    setCart(nc); setDeals(nd); persist(nc, nd);
     track("add_to_cart_deal", { productId: p.id, label: p.n, valueCents: Math.round(p.p * 0.95), cart: buildLines(nc, nd) });
   };
 
