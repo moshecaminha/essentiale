@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, MessageCircle, Truck, ShieldCheck, Heart, Quote } from "lucide-react";
 import { waLink, occasionsFor, testimonialsFor } from "@/lib/merch";
+import AccountMenu from "@/components/AccountMenu";
 
 type P = {
   id: string; name: string; slug: string; price_cents: number; stock_qty: number;
@@ -24,6 +25,7 @@ export default function ProductDetail({ p }: { p: P }) {
       <header className="hdr">
         <Link href="/" className="logo-link" aria-label="Início"><img src="/logo.png" alt="Essentiale Fragrance" className="logo-img" /></Link>
         <div className="hdr-icons" style={{ marginLeft: "auto" }}>
+          <AccountMenu />
           <a className="icon-btn" href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><MessageCircle size={19} /></a>
         </div>
       </header>

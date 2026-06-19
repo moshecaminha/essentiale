@@ -473,3 +473,13 @@ small { font-size: 11.5px; }
   .store .acc-order{ grid-template-columns:1.4fr .8fr auto; }
   .store .acc-order > strong{ display:none; }
 }
+
+/* ===== menu de conta no cabeçalho ===== */
+.store .acct{ position:relative; }
+.store .acct-btn{ display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; color:var(--ink); font-family:inherit; font-size:13px; padding:6px; }
+.store .acct-btn:hover{ color:var(--sage-deep); }
+.store .acct-label{ font-weight:500; }
+.store .acct-menu{ position:absolute; right:0; top:calc(100% + 8px); background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:0 10px 30px rgba(46,53,43,0.14); padding:8px; min-width:190px; display:flex; flex-direction:column; gap:2px; z-index:120; }
+.store .acct-menu a, .store .acct-menu button{ display:flex; align-items:center; gap:9px; padding:10px 11px; border-radius:8px; font-size:13.5px; color:var(--ink); background:none; border:none; text-align:left; cursor:pointer; font-family:inherit; width:100%; }
+.store .acct-menu a:hover, .store .acct-menu button:hover{ background:var(--paper); color:var(--sage-deep); }
+@media (max-width:640px){ .store .acct-label{ display:none; } }

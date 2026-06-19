@@ -7,6 +7,7 @@ import { MessageCircle, ShoppingBag } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { readCart, clearCart, CartLine } from "@/lib/cart";
 import { placeOrder } from "./actions";
+import AccountMenu from "@/components/AccountMenu";
 
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 
@@ -48,6 +49,7 @@ export default function Checkout() {
     <div className="store">
       <header className="hdr">
         <Link href="/" className="logo-link"><img src="/logo.png" alt="Essentiale" className="logo-img" /></Link>
+        <div className="hdr-icons" style={{ marginLeft: "auto" }}><AccountMenu /></div>
       </header>
 
       <div className="checkout">

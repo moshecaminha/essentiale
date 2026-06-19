@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { waLink, WHATSAPP } from "@/lib/merch";
 import { writeCart, CartLine } from "@/lib/cart";
+import AccountMenu from "@/components/AccountMenu";
 import {
   Search, ShoppingBag, Menu, X, Plus, Minus,
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
@@ -94,6 +95,7 @@ export default function Storefront({ products }: { products: Product[] }) {
         </nav>
         <div className="hdr-icons">
           <button className="icon-btn" aria-label="buscar" onClick={() => { document.getElementById("busca")?.focus(); document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }); }}><Search size={19} /></button>
+          <AccountMenu />
           <button className="icon-btn cart-btn" onClick={() => setCartOpen(true)} aria-label="carrinho">
             <ShoppingBag size={19} />{count > 0 && <span className="cart-count">{count}</span>}
           </button>

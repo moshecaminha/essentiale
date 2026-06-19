@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MessageCircle, ArrowLeft } from "lucide-react";
 import { waLink } from "@/lib/merch";
+import AccountMenu from "@/components/AccountMenu";
 
 export const dynamic = "force-static";
 export const metadata = { title: "Institucional — Essentiale Fragrance" };
@@ -37,6 +38,7 @@ export default function Institucional() {
       <header className="hdr">
         <Link href="/" className="logo-link"><img src="/logo.png" alt="Essentiale Fragrance" className="logo-img" /></Link>
         <div className="hdr-icons" style={{ marginLeft: "auto" }}>
+          <AccountMenu />
           <a className="icon-btn" href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><MessageCircle size={19} /></a>
         </div>
       </header>

@@ -9,7 +9,7 @@ function EntrarInner() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/conta";
-  const [modo, setModo] = useState<"entrar" | "criar">("entrar");
+  const [modo, setModo] = useState<"entrar" | "criar">(params.get("modo") === "criar" ? "criar" : "entrar");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
