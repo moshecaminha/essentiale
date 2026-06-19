@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, MessageCircle, Truck, ShieldCheck, Heart, Quote } from "lucide-react";
 import { waLink, occasionsFor, testimonialsFor } from "@/lib/merch";
 import AccountMenu from "@/components/AccountMenu";
+import BuyNowButton from "@/components/BuyNowButton";
 
 type P = {
   id: string; name: string; slug: string; price_cents: number; stock_qty: number;
@@ -46,7 +47,8 @@ export default function ProductDetail({ p }: { p: P }) {
             <div className="pdp-parcela">{parcela(p.price_cents)}</div>
             {p.description && <p className="pdp-desc">{p.description}</p>}
 
-            <a className="btn wa-btn" href={wa} target="_blank" rel="noopener noreferrer">
+            <BuyNowButton id={p.id} name={p.name} price={p.price_cents} img={p.image_url} disabled={out} />
+            <a className="btn wa-btn secondary" href={wa} target="_blank" rel="noopener noreferrer">
               <MessageCircle size={18} /> Tirar dúvida no WhatsApp
             </a>
             <span className="pdp-hint">Resposta rápida, de segunda a sexta, das 9h às 18h.</span>

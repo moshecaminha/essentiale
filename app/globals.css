@@ -483,3 +483,10 @@ small { font-size: 11.5px; }
 .store .acct-menu a, .store .acct-menu button{ display:flex; align-items:center; gap:9px; padding:10px 11px; border-radius:8px; font-size:13.5px; color:var(--ink); background:none; border:none; text-align:left; cursor:pointer; font-family:inherit; width:100%; }
 .store .acct-menu a:hover, .store .acct-menu button:hover{ background:var(--paper); color:var(--sage-deep); }
 @media (max-width:640px){ .store .acct-label{ display:none; } }
+
+/* ===== CTA Comprar agora na página de produto ===== */
+.store .pdp-buy{ background:var(--sage-deep); width:100%; justify-content:center; font-size:15px; padding:15px; margin-bottom:10px; }
+.store .pdp-buy:hover{ background:#4d6047; }
+.store .pdp-buy:disabled{ opacity:.55; cursor:not-allowed; }
+.store .wa-btn.secondary{ background:var(--surface); color:var(--sage-deep); border:1px solid var(--sage); }
+.store .wa-btn.secondary:hover{ background:var(--paper); }
