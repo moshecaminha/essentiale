@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MessageCircle, ShoppingBag } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { readCart, clearCart, CartLine } from "@/lib/cart";
+import { track } from "@/lib/track";
 import { placeOrder } from "./actions";
 import AccountMenu from "@/components/AccountMenu";
 
@@ -41,7 +42,11 @@ export default function Checkout() {
     setErro(null); setLoading(true);
     const res = await placeOrder(cart.map((c) => ({ id: c.id, qty: c.qty, deal: c.deal })), a, method);
     setLoading(false);
-    if (res.ok && res.orderId) { clearCart(); router.push(`/conta/pedidos/${res.orderId}?novo=1`); }
+    if (res.ok && res.orderId) {
+      track("purchase", { valueCents: total, cart, meta: { orderId: res.orderId } });
+      clearCart();
+      router.push(`/conta/pedidos/${res.orderId}?novo=1`);
+    }
     else setErro(res.error || "Não foi possível finalizar.");
   };
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { waLink, WHATSAPP } from "@/lib/merch";
 import { writeCart, CartLine } from "@/lib/cart";
 import AccountMenu from "@/components/AccountMenu";
+import { track } from "@/lib/track";
 import {
   Search, ShoppingBag, Menu, X, Plus, Minus,
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
@@ -46,10 +47,21 @@ export default function Storefront({ products }: { products: Product[] }) {
     return r;
   }, [cat, query, products]);
   const [deals, setDeals] = useState<Record<string, boolean>>({});
-  const add = (p: Product) => { setCart((c) => ({ ...c, [p.id]: (c[p.id] || 0) + 1 })); setCartOpen(true); };
+  const buildLines = (c: Record<string, number>, d: Record<string, boolean>): CartLine[] =>
+    Object.entries(c).map(([id, q]) => { const p = products.find((x) => x.id === id)!; return { id, n: p.n, p: p.p, img: p.img ?? null, qty: q, deal: !!d[id] }; });
+  const add = (p: Product) => {
+    const nc = { ...cart, [p.id]: (cart[p.id] || 0) + 1 };
+    setCart(nc); setCartOpen(true);
+    track("add_to_cart", { productId: p.id, label: p.n, valueCents: p.p, cart: buildLines(nc, deals) });
+  };
   const inc = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
   const dec = (id: string) => setCart((c) => { const q = (c[id] || 0) - 1; const n = { ...c }; if (q <= 0) { delete n[id]; setDeals((d) => { const nd = { ...d }; delete nd[id]; return nd; }); } else n[id] = q; return n; });
-  const addDeal = (p: Product) => { setCart((c) => ({ ...c, [p.id]: (c[p.id] || 0) + 1 })); setDeals((d) => ({ ...d, [p.id]: true })); };
+  const addDeal = (p: Product) => {
+    const nc = { ...cart, [p.id]: (cart[p.id] || 0) + 1 };
+    const nd = { ...deals, [p.id]: true };
+    setCart(nc); setDeals(nd);
+    track("add_to_cart_deal", { productId: p.id, label: p.n, valueCents: Math.round(p.p * 0.95), cart: buildLines(nc, nd) });
+  };
 
   const items = Object.entries(cart).map(([id, q]) => ({ ...products.find((p) => p.id === id)!, q }));
   const count = items.reduce((s, i) => s + i.q, 0);
@@ -67,6 +79,7 @@ export default function Storefront({ products }: { products: Product[] }) {
 
   const checkout = () => {
     if (items.length === 0) return;
+    track("whatsapp_checkout", { valueCents: total, cart: buildLines(cart, deals) });
     const lines = items.map((i) => {
       const unit = deals[i.id] ? i.p * 0.95 : i.p;
       return `• ${i.q}x ${i.n} — ${brl(unit * i.q)}`;
@@ -78,7 +91,8 @@ export default function Storefront({ products }: { products: Product[] }) {
 
   const goCheckout = () => {
     if (items.length === 0) return;
-    const lines: CartLine[] = items.map((i) => ({ id: i.id, n: i.n, p: i.p, img: i.img ?? null, qty: i.q, deal: !!deals[i.id] }));
+    const lines: CartLine[] = buildLines(cart, deals);
+    track("checkout_start", { valueCents: total, cart: lines });
     writeCart(lines);
     router.push("/checkout");
   };
@@ -233,8 +247,9 @@ export default function Storefront({ products }: { products: Product[] }) {
               {discount > 0 && <div className="sum-line disc"><span>Desconto combinado (5%)</span><span>- {brl(discount)}</span></div>}
               <div className="subtotal"><span>Total</span><strong>{brl(total)}</strong></div>
               <button className="btn full" onClick={goCheckout}>Finalizar compra</button>
-              <button className="checkout-wa-link" onClick={checkout}>ou finalizar pelo WhatsApp</button>
-              <span className="coupon">Cupom CUPOM10 aplicável na primeira compra</span>
+              <button className="btn ghost full" onClick={() => setCartOpen(false)}>Continuar comprando</button>
+              <button className="checkout-wa-link" onClick={checkout}><MessageCircle size={13} /> Finalizar ou tirar dúvida no WhatsApp</button>
+              <span className="coupon">Seu carrinho fica salvo — você pode voltar quando quiser.</span>
             </div>
           </>
         )}

@@ -490,3 +490,15 @@ small { font-size: 11.5px; }
 .store .pdp-buy:disabled{ opacity:.55; cursor:not-allowed; }
 .store .wa-btn.secondary{ background:var(--surface); color:var(--sage-deep); border:1px solid var(--sage); }
 .store .wa-btn.secondary:hover{ background:var(--paper); }
+
+/* botão fantasma full no carrinho da loja */
+.store .btn.ghost.full{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+.store .btn.ghost.full:hover{ border-color:var(--sage); color:var(--sage-deep); }
+.store .checkout-wa-link{ display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+
+/* tabela de carrinhos no admin */
+.tr.carrinhos{ grid-template-columns:1.4fr 2.2fr .8fr .9fr 1.1fr; }
+@media (max-width:920px){
+  .tr.carrinhos{ grid-template-columns:1.3fr .8fr 1.1fr; }
+  .tr.carrinhos > span:nth-child(2), .tr.carrinhos > span:nth-child(4){ display:none; }
+}

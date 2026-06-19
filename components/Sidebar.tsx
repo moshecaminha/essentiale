@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutGrid, Sparkles, Users, Megaphone, Package, Truck, Store, LogOut,
+  LayoutGrid, Sparkles, Users, Megaphone, Package, Truck, Store, LogOut, ShoppingCart,
 } from "lucide-react";
 import { logout } from "@/app/login/actions";
 
@@ -14,6 +14,7 @@ const NAV = [
   { href: "/admin/campanhas", label: "Campanhas", icon: Megaphone },
   { href: "/admin/produtos", label: "Produtos e estoque", icon: Package },
   { href: "/admin/pedidos", label: "Pedidos", icon: Truck },
+  { href: "/admin/carrinhos", label: "Carrinhos", icon: ShoppingCart },
 ];
 
 export default function Sidebar() {
