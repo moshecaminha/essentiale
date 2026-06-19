@@ -8,7 +8,10 @@ export function supabaseServer() {
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createClient(url, key, { auth: { persistSession: false } });
+  return createClient(url, key, {
+    auth: { persistSession: false },
+    global: { fetch: (input: any, init?: any) => fetch(input, { ...init, cache: "no-store" }) },
+  });
 }
 
 // Indica se o painel está com acesso completo (clientes, pedidos, RFM)
