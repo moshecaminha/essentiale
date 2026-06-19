@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutGrid, Sparkles, Users, Megaphone, Package, Truck, Store,
+  LayoutGrid, Sparkles, Users, Megaphone, Package, Truck, Store, LogOut,
 } from "lucide-react";
+import { logout } from "@/app/login/actions";
 
 const NAV = [
   { href: "/admin", label: "Visão geral", icon: LayoutGrid },
@@ -36,6 +37,11 @@ export default function Sidebar() {
       </nav>
       <div className="side-foot">
         <Link href="/" className="nav-item"><Store size={17} /> <span>Ver a loja</span></Link>
+        <form action={logout}>
+          <button type="submit" className="nav-item" style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+            <LogOut size={17} /> <span>Sair</span>
+          </button>
+        </form>
         <div className="owner">
           <span className="owner-av">EF</span>
           <span>Equipe Essentiale</span>

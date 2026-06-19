@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { waLink } from "@/lib/merch";
+import { waLink, WHATSAPP } from "@/lib/merch";
 import {
   Search, ShoppingBag, Menu, X, Plus, Minus,
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
@@ -34,7 +34,13 @@ export default function Storefront({ products }: { products: Product[] }) {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [cartOpen, setCartOpen] = useState(false);
 
-  const list = useMemo(() => cat === "Todos" ? products : products.filter((p) => p.c === cat), [cat, products]);
+  const [query, setQuery] = useState("");
+  const list = useMemo(() => {
+    let r = cat === "Todos" ? products : products.filter((p) => p.c === cat);
+    const term = query.trim().toLowerCase();
+    if (term) r = r.filter((p) => p.n.toLowerCase().includes(term));
+    return r;
+  }, [cat, query, products]);
   const [deals, setDeals] = useState<Record<string, boolean>>({});
   const add = (p: Product) => { setCart((c) => ({ ...c, [p.id]: (c[p.id] || 0) + 1 })); setCartOpen(true); };
   const inc = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
@@ -55,6 +61,17 @@ export default function Storefront({ products }: { products: Product[] }) {
 
   const goCat = (c: string) => { setCat(c); document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }); };
 
+  const checkout = () => {
+    if (items.length === 0) return;
+    const lines = items.map((i) => {
+      const unit = deals[i.id] ? i.p * 0.95 : i.p;
+      return `• ${i.q}x ${i.n} — ${brl(unit * i.q)}`;
+    }).join("\n");
+    let msg = `Olá! Quero finalizar meu pedido na Essentiale:\n\n${lines}\n\nTotal: ${brl(total)}`;
+    if (discount > 0) msg += `\n(já com desconto combinado de ${brl(discount)})`;
+    window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
   return (
     <div className="store">
       <div className="announce">Enviamos para todo o Brasil · Parcele em até 3x sem juros · Use <strong>CUPOM10</strong> e ganhe 10% na primeira compra</div>
@@ -66,7 +83,7 @@ export default function Storefront({ products }: { products: Product[] }) {
           {NAV.map((x) => <button key={x} className={`navlink ${cat === x ? "on" : ""}`} onClick={() => goCat(x)}>{x}</button>)}
         </nav>
         <div className="hdr-icons">
-          <button className="icon-btn" aria-label="buscar"><Search size={19} /></button>
+          <button className="icon-btn" aria-label="buscar" onClick={() => { document.getElementById("busca")?.focus(); document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }); }}><Search size={19} /></button>
           <button className="icon-btn cart-btn" onClick={() => setCartOpen(true)} aria-label="carrinho">
             <ShoppingBag size={19} />{count > 0 && <span className="cart-count">{count}</span>}
           </button>
@@ -101,6 +118,11 @@ export default function Storefront({ products }: { products: Product[] }) {
         <div className="shop-head">
           <div><span className="eyebrow">Nossa loja</span><h2>Escolha o seu aroma</h2></div>
           <span className="count-note">{list.length} produtos</span>
+        </div>
+        <div className="searchbar">
+          <Search size={16} />
+          <input id="busca" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar produto pelo nome..." />
+          {query && <button className="search-clear" onClick={() => setQuery("")} aria-label="limpar"><X size={15} /></button>}
         </div>
         <div className="cats">
           {CATS.map((x) => <button key={x} className={`cat ${cat === x ? "on" : ""}`} onClick={() => setCat(x)}>{x}</button>)}
@@ -150,13 +172,13 @@ export default function Storefront({ products }: { products: Product[] }) {
             <img src="/logo.png" alt="Essentiale" className="ftr-logo" />
             <p>Recife · PE</p>
             <div className="socials">
-              <a href="#" className="icon-btn"><Instagram size={18} /></a>
-              <a href="#" className="icon-btn"><MessageCircle size={18} /></a>
+              <a href="https://instagram.com/essentialefragrance" target="_blank" rel="noopener noreferrer" className="icon-btn"><Instagram size={18} /></a>
+              <a href={waLink("Atendimento")} target="_blank" rel="noopener noreferrer" className="icon-btn"><MessageCircle size={18} /></a>
             </div>
           </div>
-          <div className="ftr-col"><h4>Institucional</h4><a href="#">Sobre nós</a><a href="#">Fale conosco</a><a href="#">Perguntas frequentes</a></div>
-          <div className="ftr-col"><h4>Ajuda</h4><a href="#">Trocas e devoluções</a><a href="#">Política de privacidade</a><a href="#">Instruções de uso</a></div>
-          <div className="ftr-col"><h4>Atendimento</h4><a href="#">WhatsApp (81) 99908-9912</a><a href="#">Showroom em Recife/PE</a><a href="#">Seg a sex, 9h às 18h</a></div>
+          <div className="ftr-col"><h4>Institucional</h4><Link href="/institucional#sobre">Sobre nós</Link><Link href="/institucional#contato">Fale conosco</Link><Link href="/institucional#faq">Perguntas frequentes</Link></div>
+          <div className="ftr-col"><h4>Ajuda</h4><Link href="/institucional#trocas">Trocas e devoluções</Link><Link href="/institucional#entrega">Entrega e frete</Link><Link href="/institucional#pagamento">Formas de pagamento</Link></div>
+          <div className="ftr-col"><h4>Atendimento</h4><a href={waLink("Atendimento")} target="_blank" rel="noopener noreferrer">WhatsApp (81) 99908-9912</a><span>Showroom em Recife/PE</span><span>Seg a sex, 9h às 18h</span></div>
         </div>
         <div className="ftr-base">Essentiale Ind. e Com. Ltda · CNPJ 51.550.281/0001-97 · {new Date().getFullYear()}</div>
       </footer>
@@ -198,7 +220,7 @@ export default function Storefront({ products }: { products: Product[] }) {
               <div className="sum-line"><span>Subtotal</span><span>{brl(subtotal)}</span></div>
               {discount > 0 && <div className="sum-line disc"><span>Desconto combinado (5%)</span><span>- {brl(discount)}</span></div>}
               <div className="subtotal"><span>Total</span><strong>{brl(total)}</strong></div>
-              <button className="btn full">Finalizar compra</button>
+              <button className="btn full" onClick={checkout}>Finalizar pelo WhatsApp</button>
               <span className="coupon">Cupom CUPOM10 aplicável na primeira compra</span>
             </div>
           </>
