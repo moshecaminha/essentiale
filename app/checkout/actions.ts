@@ -7,7 +7,10 @@ import { METHOD_LABEL } from "@/lib/orders";
 import { revalidatePath } from "next/cache";
 
 type CartItem = { id: string; qty: number; deal?: boolean };
-type Address = { cep: string; street: string; number: string; complement: string; district: string; city: string; uf: string; phone: string };
+type Address = {
+  id?: string; label?: string; cep: string; street: string; number: string;
+  complement: string; district: string; city: string; uf: string; phone: string;
+};
 
 export async function placeOrder(cart: CartItem[], address: Address, method: string): Promise<{ ok: boolean; orderId?: string; error?: string }> {
   const { user, customer } = await getCurrentCustomer();
@@ -33,11 +36,37 @@ export async function placeOrder(cart: CartItem[], address: Address, method: str
   const subtotal = lines.reduce((s, l) => s + l.total_cents, 0);
   const total = subtotal; // frete calculado na confirmação do pagamento
 
-  // atualiza dados do cliente (endereço por CEP)
+  // resolve o endereço: salvo (id) ou novo (salva para reuso)
+  let ship = { cep: address.cep, street: address.street, number: address.number, complement: address.complement, district: address.district, city: address.city, uf: address.uf };
+  let addressId: string | null = null;
+
+  if (address.id) {
+    const { data: saved } = await sb.from("addresses").select("*").eq("id", address.id).eq("customer_id", customer.id).maybeSingle();
+    if (saved) {
+      ship = { cep: saved.cep, street: saved.street, number: saved.number, complement: saved.complement, district: saved.district, city: saved.city, uf: saved.uf };
+      addressId = saved.id;
+    }
+  }
+  if (!addressId) {
+    const { data: novo } = await sb.from("addresses").insert({
+      customer_id: customer.id,
+      label: (address.label || "").trim() || "Endereço",
+      recipient: customer.full_name,
+      cep: ship.cep, street: ship.street, number: ship.number, complement: ship.complement,
+      district: ship.district, city: ship.city, uf: ship.uf, is_default: true,
+    }).select("id").single();
+    addressId = novo?.id ?? null;
+  }
+  if (addressId) {
+    await sb.from("addresses").update({ is_default: false }).eq("customer_id", customer.id).neq("id", addressId);
+    await sb.from("addresses").update({ is_default: true }).eq("id", addressId);
+  }
+
+  // mantém os dados do cliente atualizados (último endereço / telefone)
   await sb.from("customers").update({
     phone: address.phone || customer.phone,
-    cep: address.cep, street: address.street, number: address.number,
-    complement: address.complement, district: address.district, city: address.city, uf: address.uf,
+    cep: ship.cep, street: ship.street, number: ship.number,
+    complement: ship.complement, district: ship.district, city: ship.city, uf: ship.uf,
   }).eq("id", customer.id);
 
   const { data: order, error } = await sb.from("orders").insert({
@@ -47,9 +76,9 @@ export async function placeOrder(cart: CartItem[], address: Address, method: str
     subtotal_cents: subtotal,
     total_cents: total,
     ship_recipient: customer.full_name,
-    ship_cep: address.cep, ship_street: address.street, ship_number: address.number,
-    ship_complement: address.complement, ship_district: address.district,
-    ship_city: address.city, ship_uf: address.uf,
+    ship_cep: ship.cep, ship_street: ship.street, ship_number: ship.number,
+    ship_complement: ship.complement, ship_district: ship.district,
+    ship_city: ship.city, ship_uf: ship.uf,
     placed_at: new Date().toISOString(),
   }).select("id,order_number").single();
 
@@ -68,6 +97,7 @@ export async function placeOrder(cart: CartItem[], address: Address, method: str
   }
 
   revalidatePath("/conta/pedidos");
+  revalidatePath("/conta/enderecos");
   revalidatePath("/admin/pedidos");
   return { ok: true, orderId: order.id };
 }

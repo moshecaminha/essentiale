@@ -9,6 +9,7 @@ export default function ContaLayout({ children }: { children: React.ReactNode })
         <nav className="acc-nav">
           <Link href="/conta">Minha conta</Link>
           <Link href="/conta/pedidos">Meus pedidos</Link>
+          <Link href="/conta/enderecos">Meus endereços</Link>
           <Link href="/">Loja</Link>
         </nav>
         <div style={{ marginLeft: "auto" }}><CustomerLogout /></div>
