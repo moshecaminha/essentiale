@@ -418,3 +418,58 @@ small { font-size: 11.5px; }
   .order-line > span:nth-child(2){ display:none; }
   .track-label{ font-size:8.5px; }
 }
+
+/* ===== checkout ===== */
+.store .checkout{ max-width:1000px; margin:0 auto; padding:24px 32px 56px; }
+.store .checkout h1{ font-size:28px; margin-bottom:20px; }
+.store .checkout-grid{ display:grid; grid-template-columns:1.5fr 1fr; gap:20px; align-items:start; }
+.store .checkout-sum{ position:sticky; top:20px; }
+.store .sum-row{ display:flex; justify-content:space-between; font-size:13.5px; color:#4f574b; padding:5px 0; gap:12px; }
+.store .sum-row.total{ border-top:1px solid var(--line); margin-top:6px; padding-top:12px; font-size:16px; color:var(--ink); }
+.store .checkout-wa{ display:flex; align-items:center; justify-content:center; gap:7px; font-size:12.5px; color:var(--sage-deep); margin-top:4px; }
+.store .checkout-wa-link{ display:block; width:100%; text-align:center; background:none; border:none; color:var(--sage-deep); font-size:12.5px; cursor:pointer; margin-top:8px; text-decoration:underline; }
+
+/* ===== login / cadastro do cliente ===== */
+.store .auth-wrap{ min-height:70vh; display:grid; place-items:center; padding:32px 20px; }
+.store .auth-card{ width:100%; max-width:380px; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:30px; display:flex; flex-direction:column; gap:14px; box-shadow:0 8px 30px rgba(46,53,43,0.06); }
+.store .auth-logo{ width:150px; margin:0 auto 4px; display:block; }
+.store .auth-tabs{ display:flex; background:var(--paper); border-radius:10px; padding:4px; gap:4px; }
+.store .auth-tabs button{ flex:1; border:none; background:none; padding:9px; border-radius:8px; font-size:13.5px; font-weight:600; color:var(--muted); cursor:pointer; font-family:inherit; }
+.store .auth-tabs button.on{ background:var(--surface); color:var(--ink); box-shadow:0 1px 4px rgba(46,53,43,0.08); }
+.store .auth-card .field label{ font-size:12px; font-weight:600; color:var(--muted); }
+.store .auth-card .field input{ border:1px solid var(--line); border-radius:9px; padding:11px 12px; font-size:14px; font-family:inherit; width:100%; background:var(--surface); }
+.store .auth-erro{ font-size:12.5px; color:var(--clay); background:rgba(181,113,92,0.1); border:1px solid rgba(181,113,92,0.3); padding:9px 12px; border-radius:9px; }
+.store .auth-ok{ font-size:12.5px; color:var(--sage-deep); background:rgba(141,165,133,0.14); border:1px solid rgba(141,165,133,0.35); padding:9px 12px; border-radius:9px; }
+.store .auth-back{ text-align:center; font-size:12.5px; color:var(--muted); }
+
+/* ===== área do cliente ===== */
+.store .acc-nav{ display:flex; gap:20px; margin-left:32px; }
+.store .acc-nav a{ font-size:14px; color:var(--ink); }
+.store .acc-nav a:hover{ color:var(--sage-deep); }
+.store .account{ max-width:840px; margin:0 auto; padding:28px 32px 56px; }
+.store .account h1{ font-size:26px; }
+.store .acc-sub{ color:var(--muted); font-size:14px; margin:6px 0 22px; }
+.store .acc-logout{ display:inline-flex; align-items:center; gap:7px; background:none; border:1px solid var(--line); border-radius:9px; padding:8px 13px; font-size:13px; color:var(--ink); cursor:pointer; }
+.store .acc-logout:hover{ border-color:var(--clay); color:var(--clay); }
+.store .acc-cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.store .acc-card{ display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; color:var(--ink); }
+.store .acc-card svg{ color:var(--sage-deep); flex-shrink:0; }
+.store .acc-card > div{ flex:1; display:flex; flex-direction:column; }
+.store .acc-card strong{ font-size:14.5px; }
+.store .acc-card span{ font-size:12.5px; color:var(--muted); }
+.store .acc-card:not(.static):hover{ border-color:var(--sage); }
+.store .acc-orders{ display:flex; flex-direction:column; gap:10px; }
+.store .acc-order{ display:grid; grid-template-columns:1.6fr 1fr .8fr auto; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:15px 18px; color:var(--ink); }
+.store .acc-order:hover{ border-color:var(--sage); }
+.store .acc-order > div{ display:flex; flex-direction:column; }
+.store .acc-order svg{ color:var(--muted); }
+.store .ok-banner{ display:flex; align-items:center; gap:9px; background:rgba(141,165,133,0.14); border:1px solid rgba(141,165,133,0.35); color:var(--sage-deep); padding:12px 15px; border-radius:11px; font-size:13.5px; margin-bottom:18px; }
+
+@media (max-width:760px){
+  .store .checkout-grid{ grid-template-columns:1fr; }
+  .store .checkout, .store .account{ padding:18px 18px 40px; }
+  .store .acc-cards{ grid-template-columns:1fr; }
+  .store .acc-nav{ display:none; }
+  .store .acc-order{ grid-template-columns:1.4fr .8fr auto; }
+  .store .acc-order > strong{ display:none; }
+}

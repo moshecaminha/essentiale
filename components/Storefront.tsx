@@ -2,7 +2,9 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { waLink, WHATSAPP } from "@/lib/merch";
+import { writeCart, CartLine } from "@/lib/cart";
 import {
   Search, ShoppingBag, Menu, X, Plus, Minus,
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
@@ -30,6 +32,7 @@ function Motif({ cat }: { cat: string }) {
 }
 
 export default function Storefront({ products }: { products: Product[] }) {
+  const router = useRouter();
   const [cat, setCat] = useState("Todos");
   const [cart, setCart] = useState<Record<string, number>>({});
   const [cartOpen, setCartOpen] = useState(false);
@@ -70,6 +73,13 @@ export default function Storefront({ products }: { products: Product[] }) {
     let msg = `Olá! Quero finalizar meu pedido na Essentiale:\n\n${lines}\n\nTotal: ${brl(total)}`;
     if (discount > 0) msg += `\n(já com desconto combinado de ${brl(discount)})`;
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const goCheckout = () => {
+    if (items.length === 0) return;
+    const lines: CartLine[] = items.map((i) => ({ id: i.id, n: i.n, p: i.p, img: i.img ?? null, qty: i.q, deal: !!deals[i.id] }));
+    writeCart(lines);
+    router.push("/checkout");
   };
 
   return (
@@ -220,7 +230,8 @@ export default function Storefront({ products }: { products: Product[] }) {
               <div className="sum-line"><span>Subtotal</span><span>{brl(subtotal)}</span></div>
               {discount > 0 && <div className="sum-line disc"><span>Desconto combinado (5%)</span><span>- {brl(discount)}</span></div>}
               <div className="subtotal"><span>Total</span><strong>{brl(total)}</strong></div>
-              <button className="btn full" onClick={checkout}>Finalizar pelo WhatsApp</button>
+              <button className="btn full" onClick={goCheckout}>Finalizar compra</button>
+              <button className="checkout-wa-link" onClick={checkout}>ou finalizar pelo WhatsApp</button>
               <span className="coupon">Cupom CUPOM10 aplicável na primeira compra</span>
             </div>
           </>
