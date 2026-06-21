@@ -12,10 +12,18 @@ import {
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
 } from "lucide-react";
 
-type Product = { id: string; n: string; slug: string; c: string; p: number; s: number; img?: string | null; d?: string | null };
+type Product = { id: string; n: string; slug: string; c: string; p: number; s: number; img?: string | null; d?: string | null; w?: boolean; fr?: string | null };
 
-const CATS = ["Todos", "Velas Aromáticas", "Difusores", "Home Sprays", "Sabonetes", "Essências", "Afetos & Cartões", "Bem-estar", "Kits & Atacado"];
-const NAV = ["Velas Aromáticas", "Difusores", "Home Sprays", "Afetos & Cartões", "Kits & Atacado"];
+const CATS = ["Todos", "Velas Aromáticas", "Difusores", "Home Sprays", "Sabonetes", "Essências", "Afetos & Cartões", "Bem-estar", "Atacado"];
+const NAV = ["Velas Aromáticas", "Difusores", "Home Sprays", "Afetos & Cartões", "Atacado"];
+
+const PRICE_RANGES = [
+  { l: "Qualquer preço", min: 0, max: Infinity },
+  { l: "Até R$ 50", min: 0, max: 5000 },
+  { l: "R$ 50 a R$ 100", min: 5000, max: 10000 },
+  { l: "R$ 100 a R$ 200", min: 10000, max: 20000 },
+  { l: "Acima de R$ 200", min: 20000, max: Infinity },
+];
 
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 const parcela = (p: number) => p >= 6000 ? `ou 3x de ${brl(p / 3)} sem juros` : p >= 3000 ? `ou 2x de ${brl(p / 2)} sem juros` : "à vista no Pix";
@@ -29,7 +37,7 @@ function Motif({ cat }: { cat: string }) {
   if (cat === "Essências") return <svg {...c}><path {...s} d="M60 36c8 14 14 20 14 30a14 14 0 0 1-28 0c0-10 6-16 14-30z" /></svg>;
   if (cat === "Afetos & Cartões") return <svg {...c}><path {...s} d="M60 86s-22-13-22-29a12 12 0 0 1 22-7 12 12 0 0 1 22 7c0 16-22 29-22 29z" /></svg>;
   if (cat === "Bem-estar") return <svg {...c}><path {...s} d="M60 90c0-26 8-44 28-52-2 24-12 42-28 52z" /><path {...s} d="M60 90C44 80 36 62 34 40c14 6 22 18 26 34" /></svg>;
-  if (cat === "Kits & Atacado") return <svg {...c}><path {...s} d="M40 54l20-10 20 10-20 10z" /><path {...s} d="M40 54v22l20 10 20-10V54" /><path {...s} d="M60 64v22" /></svg>;
+  if (cat === "Atacado") return <svg {...c}><path {...s} d="M40 54l20-10 20 10-20 10z" /><path {...s} d="M40 54v22l20 10 20-10V54" /><path {...s} d="M60 64v22" /></svg>;
   return <svg {...c}><rect {...s} x="48" y="56" width="24" height="38" rx="3" /><path {...s} d="M60 56v-8" /><path {...s} d="M60 48c0-6-5-7-5-12 0 0 5 2 5 8 0-6 5-8 5-8 0 5-5 6-5 12z" /></svg>;
 }
 
@@ -40,12 +48,25 @@ export default function Storefront({ products }: { products: Product[] }) {
   const [cartOpen, setCartOpen] = useState(false);
 
   const [query, setQuery] = useState("");
+  const [fragrance, setFragrance] = useState("Todas");
+  const [priceIdx, setPriceIdx] = useState(0);
+
+  const fragrances = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => { if (p.fr) set.add(p.fr); });
+    return Array.from(set).sort();
+  }, [products]);
+
   const list = useMemo(() => {
-    let r = cat === "Todos" ? products : products.filter((p) => p.c === cat);
+    // "Todos" mostra tudo menos atacado; atacado só aparece ao clicar na categoria Atacado
+    let r = cat === "Todos" ? products.filter((p) => !p.w) : products.filter((p) => p.c === cat);
     const term = query.trim().toLowerCase();
-    if (term) r = r.filter((p) => p.n.toLowerCase().includes(term));
+    if (term) r = r.filter((p) => p.n.toLowerCase().includes(term) || (p.fr ?? "").toLowerCase().includes(term));
+    if (fragrance !== "Todas") r = r.filter((p) => p.fr === fragrance);
+    const range = PRICE_RANGES[priceIdx];
+    if (range && (range.min > 0 || range.max !== Infinity)) r = r.filter((p) => p.p >= range.min && p.p < range.max);
     return r;
-  }, [cat, query, products]);
+  }, [cat, query, fragrance, priceIdx, products]);
   const [deals, setDeals] = useState<Record<string, boolean>>({});
   const buildLines = (c: Record<string, number>, d: Record<string, boolean>): CartLine[] =>
     Object.entries(c).map(([id, q]) => { const p = products.find((x) => x.id === id)!; return { id, n: p.n, p: p.p, img: p.img ?? null, qty: q, deal: !!d[id] }; });
@@ -164,10 +185,21 @@ export default function Storefront({ products }: { products: Product[] }) {
           <div><span className="eyebrow">Nossa loja</span><h2>Escolha o seu aroma</h2></div>
           <span className="count-note">{list.length} produtos</span>
         </div>
-        <div className="searchbar">
-          <Search size={16} />
-          <input id="busca" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar produto pelo nome..." />
-          {query && <button className="search-clear" onClick={() => setQuery("")} aria-label="limpar"><X size={15} /></button>}
+        <div className="filters">
+          <div className="searchbar">
+            <Search size={16} />
+            <input id="busca" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar produto pelo nome..." />
+            {query && <button className="search-clear" onClick={() => setQuery("")} aria-label="limpar"><X size={15} /></button>}
+          </div>
+          {fragrances.length > 0 && (
+            <select className="filter-select" value={fragrance} onChange={(e) => setFragrance(e.target.value)}>
+              <option value="Todas">Todas as fragrâncias</option>
+              {fragrances.map((f) => <option key={f} value={f}>{f}</option>)}
+            </select>
+          )}
+          <select className="filter-select" value={priceIdx} onChange={(e) => setPriceIdx(Number(e.target.value))}>
+            {PRICE_RANGES.map((r, i) => <option key={i} value={i}>{r.l}</option>)}
+          </select>
         </div>
         <div className="cats">
           {CATS.map((x) => <button key={x} className={`cat ${cat === x ? "on" : ""}`} onClick={() => setCat(x)}>{x}</button>)}

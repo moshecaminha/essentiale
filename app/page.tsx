@@ -7,7 +7,7 @@ export default async function Home() {
   const sb = supabaseServer();
   const { data } = await sb
     .from("products")
-    .select("id,name,slug,price_cents,stock_qty,image_url,description,category:categories(name)")
+    .select("id,name,slug,price_cents,stock_qty,image_url,description,is_wholesale,fragrance,category:categories(name)")
     .eq("active", true)
     .order("price_cents", { ascending: false });
 
@@ -20,6 +20,8 @@ export default async function Home() {
     s: p.stock_qty,
     img: p.image_url ?? null,
     d: p.description ?? null,
+    w: p.is_wholesale ?? false,
+    fr: p.fragrance ?? null,
   }));
 
   return <Storefront products={products} />;

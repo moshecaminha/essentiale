@@ -47,6 +47,8 @@ export async function saveProduct(formData: FormData) {
     stock_qty: parseInt(String(formData.get("stock_qty") || "0"), 10) || 0,
     low_stock_threshold: parseInt(String(formData.get("low_stock_threshold") || "10"), 10) || 10,
     description: String(formData.get("description") || "") || null,
+    fragrance: String(formData.get("fragrance") || "").trim() || null,
+    is_wholesale: formData.get("is_wholesale") === "on",
     active: formData.get("active") === "on",
     image_url,
   };

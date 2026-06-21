@@ -8,7 +8,7 @@ type Product = {
   id: string; name: string; slug: string; price_cents: number;
   compare_at_cents: number | null; stock_qty: number; low_stock_threshold: number;
   description: string | null; active: boolean; image_url: string | null;
-  category_id: string | null;
+  category_id: string | null; fragrance: string | null; is_wholesale: boolean;
 } | null;
 
 const reais = (c: number | null) => (c == null ? "" : (c / 100).toFixed(2).replace(".", ","));
@@ -64,9 +64,17 @@ export default function ProductForm({ product, categories }: { product: Product;
             <label>Alerta de estoque baixo</label>
             <input name="low_stock_threshold" type="number" min="0" defaultValue={product?.low_stock_threshold ?? 10} />
           </div>
+          <div className="field">
+            <label>Fragrância (para o filtro da loja)</label>
+            <input name="fragrance" defaultValue={product?.fragrance ?? ""} placeholder="Ex: Felicità, Poésie…" />
+          </div>
           <div className="field full">
             <label>Descrição</label>
             <textarea name="description" defaultValue={product?.description ?? ""} />
+          </div>
+          <div className="field field-check">
+            <input id="is_wholesale" name="is_wholesale" type="checkbox" defaultChecked={product?.is_wholesale ?? false} />
+            <label htmlFor="is_wholesale" style={{ color: "var(--ink)" }}>Produto de atacado (fica fora da aba &quot;Todos&quot;, só na categoria Atacado)</label>
           </div>
           <div className="field full field-check">
             <input id="active" name="active" type="checkbox" defaultChecked={product?.active ?? true} />

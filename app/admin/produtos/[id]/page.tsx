@@ -15,7 +15,7 @@ export default async function EditarProduto({ params }: { params: { id: string }
   if (!novo) {
     const { data } = await sb
       .from("products")
-      .select("id,name,slug,price_cents,compare_at_cents,stock_qty,low_stock_threshold,description,active,image_url,category_id")
+      .select("id,name,slug,price_cents,compare_at_cents,stock_qty,low_stock_threshold,description,active,image_url,category_id,fragrance,is_wholesale")
       .eq("id", params.id)
       .maybeSingle();
     product = data;
