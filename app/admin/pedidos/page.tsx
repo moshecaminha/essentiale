@@ -14,20 +14,38 @@ type Order = {
 const pillClass = (s: string) =>
   s === "entregue" ? "ok" : s === "aguardando_pagamento" ? "low" : s === "cancelado" || s === "reembolsado" ? "out" : "info";
 
-export default async function Pedidos() {
+// Filtros de status na ordem do fluxo do pedido
+const FILTERS: { key: string; label: string; statuses: string[] }[] = [
+  { key: "todos", label: "Todos", statuses: [] },
+  { key: "pendentes", label: "Pendentes", statuses: ["aguardando_pagamento"] },
+  { key: "pagos", label: "Pagos", statuses: ["pago"] },
+  { key: "em_espera", label: "Em separação", statuses: ["em_separacao"] },
+  { key: "enviados", label: "Enviados", statuses: ["enviado", "a_caminho"] },
+  { key: "entregues", label: "Entregues", statuses: ["entregue"] },
+  { key: "cancelados", label: "Cancelados", statuses: ["cancelado", "reembolsado"] },
+];
+
+export default async function Pedidos({ searchParams }: { searchParams?: { status?: string } }) {
   const sb = supabaseServer();
   const { data: orders = [] } = await sb
     .from("orders")
     .select("id,order_number,status,total_cents,placed_at,customer:customers(full_name)")
     .order("placed_at", { ascending: false });
 
-  const list = (orders as unknown as Order[]) ?? [];
-  const pagos = list.filter((o) => !["aguardando_pagamento", "cancelado"].includes(o.status));
+  const all = (orders as unknown as Order[]) ?? [];
+
+  const active = FILTERS.find((f) => f.key === (searchParams?.status ?? "todos")) ?? FILTERS[0];
+  const list = active.statuses.length === 0 ? all : all.filter((o) => active.statuses.includes(o.status));
+
+  const countFor = (f: (typeof FILTERS)[number]) =>
+    f.statuses.length === 0 ? all.length : all.filter((o) => f.statuses.includes(o.status)).length;
+
+  const pagos = all.filter((o) => !["aguardando_pagamento", "cancelado", "reembolsado"].includes(o.status));
   const receita = pagos.reduce((s, o) => s + o.total_cents, 0);
-  const pend = list.filter((o) => o.status === "aguardando_pagamento").length;
+  const pend = all.filter((o) => o.status === "aguardando_pagamento").length;
 
   const resumo = [
-    { l: "Pedidos", v: String(list.length) },
+    { l: "Pedidos", v: String(all.length) },
     { l: "Receita registrada", v: brl(receita) },
     { l: "Aguardando pagamento", v: String(pend) },
   ];
@@ -45,11 +63,28 @@ export default async function Pedidos() {
           ))}
         </section>
 
-        {list.length === 0 ? (
+        <div className="status-tabs">
+          {FILTERS.map((f) => (
+            <Link
+              key={f.key}
+              href={f.key === "todos" ? "/admin/pedidos" : `/admin/pedidos?status=${f.key}`}
+              className={`status-tab ${active.key === f.key ? "on" : ""}`}
+            >
+              {f.label} <span className="status-count">{countFor(f)}</span>
+            </Link>
+          ))}
+        </div>
+
+        {all.length === 0 ? (
           <div className="empty">
             <div className="eyebrow">Nenhum pedido ainda</div>
             <p>Registre as vendas que chegam pelo WhatsApp em &quot;Registrar pedido&quot;. Cada pedido alimenta o Financeiro, os Clientes (RFM) e a Inteligência automaticamente.</p>
             <Link href="/admin/pedidos/novo" className="adm-btn"><Plus size={16} /> Registrar primeiro pedido</Link>
+          </div>
+        ) : list.length === 0 ? (
+          <div className="empty">
+            <div className="eyebrow">Nada por aqui</div>
+            <p>Nenhum pedido com o status &quot;{active.label}&quot; no momento.</p>
           </div>
         ) : (
           <div className="card no-pad">

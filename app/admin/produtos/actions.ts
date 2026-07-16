@@ -13,6 +13,15 @@ const toCents = (v: string) => {
   return isNaN(n) ? 0 : Math.round(n * 100);
 };
 
+const toNum = (v: FormDataEntryValue | null) => {
+  const s = String(v ?? "").trim().replace(",", ".");
+  if (!s) return null;
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+};
+
+const toText = (v: FormDataEntryValue | null) => String(v ?? "").trim() || null;
+
 async function uploadIfPresent(formData: FormData): Promise<string | null> {
   const file = formData.get("image") as File | null;
   if (!file || file.size === 0) return null;
@@ -51,6 +60,25 @@ export async function saveProduct(formData: FormData) {
     is_wholesale: formData.get("is_wholesale") === "on",
     active: formData.get("active") === "on",
     image_url,
+    // Preços e fiscal
+    cost_cents: formData.get("cost") && String(formData.get("cost")).trim() ? toCents(String(formData.get("cost"))) : null,
+    sku: toText(formData.get("sku")),
+    gtin: toText(formData.get("gtin")),
+    ncm: toText(formData.get("ncm")),
+    cest: toText(formData.get("cest")),
+    cfop: toText(formData.get("cfop")),
+    origem: parseInt(String(formData.get("origem") || "0"), 10) || 0,
+    csosn: toText(formData.get("csosn")),
+    cst_icms: toText(formData.get("cst_icms")),
+    aliq_icms: toNum(formData.get("aliq_icms")),
+    aliq_pis: toNum(formData.get("aliq_pis")),
+    aliq_cofins: toNum(formData.get("aliq_cofins")),
+    unidade: toText(formData.get("unidade")) ?? "UN",
+    // Logística
+    peso_gramas: toNum(formData.get("peso_gramas")) != null ? Math.round(toNum(formData.get("peso_gramas"))!) : null,
+    altura_cm: toNum(formData.get("altura_cm")),
+    largura_cm: toNum(formData.get("largura_cm")),
+    profundidade_cm: toNum(formData.get("profundidade_cm")),
   };
 
   if (id && id !== "novo") {
@@ -79,7 +107,7 @@ export async function duplicateProduct(formData: FormData) {
   const sb = supabaseServer();
   const { data: orig } = await sb
     .from("products")
-    .select("name,category_id,price_cents,compare_at_cents,stock_qty,low_stock_threshold,description,image_url")
+    .select("name,category_id,price_cents,compare_at_cents,stock_qty,low_stock_threshold,description,image_url,fragrance,is_wholesale,cost_cents,ncm,cest,cfop,origem,csosn,cst_icms,aliq_icms,aliq_pis,aliq_cofins,unidade,peso_gramas,altura_cm,largura_cm,profundidade_cm")
     .eq("id", id)
     .maybeSingle();
   if (!orig) return;

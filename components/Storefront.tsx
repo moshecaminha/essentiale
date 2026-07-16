@@ -9,13 +9,19 @@ import AccountMenu from "@/components/AccountMenu";
 import { track } from "@/lib/track";
 import {
   Search, ShoppingBag, Menu, X, Plus, Minus,
-  Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight,
+  Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight, ChevronDown,
 } from "lucide-react";
 
-type Product = { id: string; n: string; slug: string; c: string; p: number; s: number; img?: string | null; d?: string | null; w?: boolean; fr?: string | null };
+type Product = { id: string; n: string; slug: string; c: string; p: number; s: number; img?: string | null; d?: string | null; w?: boolean; fr?: string | null; cmp?: number | null };
 
-const CATS = ["Todos", "Velas Aromáticas", "Difusores", "Home Sprays", "Sabonetes", "Essências", "Afetos & Cartões", "Bem-estar", "Atacado"];
-const NAV = ["Velas Aromáticas", "Difusores", "Home Sprays", "Afetos & Cartões", "Atacado"];
+// Menu idêntico ao site oficial (essentialefragrance.com.br)
+const CATS = ["Todos", "Namorados", "Home Sprays", "Difusores", "Velas", "Sabonetes", "Essências", "Afetos", "Kits", "Acessórios", "Corporativo e Eventos", "Ofertas"];
+const NAV_SIMPLE_1 = ["Namorados", "Home Sprays", "Difusores", "Velas", "Sabonetes", "Essências"];
+const NAV_SIMPLE_2 = ["Acessórios", "Corporativo e Eventos", "Ofertas"];
+const NAV_FRAGRANCES = ["Delicata", "Explosie", "Felicità", "Iluminatè", "Luxus", "Uniquè", "Poesie", "Vivace", "Serène", "Vollutà", "Vivaqua", "Speziata", "Solarie", "Voluttà", "Mièlle", "Avelinè"];
+const NAV_COLECOES = ["Afetos", "Kits"];
+// Categorias que ficam fora da aba "Todos" (venda em volume, como no site em Corporativo e Eventos)
+const WHOLESALE_CAT = "Corporativo e Eventos";
 
 const PRICE_RANGES = [
   { l: "Qualquer preço", min: 0, max: Infinity },
@@ -35,9 +41,9 @@ function Motif({ cat }: { cat: string }) {
   if (cat === "Home Sprays") return <svg {...c}><rect {...s} x="50" y="58" width="20" height="36" rx="4" /><path {...s} d="M54 58v-8h12v8" /><path {...s} d="M66 50h8v-8h-8z" /><path {...s} d="M82 40h2M86 36h2M84 46h2M88 42h2M82 50h2" /></svg>;
   if (cat === "Sabonetes") return <svg {...c}><rect {...s} x="42" y="58" width="36" height="26" rx="8" /><path {...s} d="M54 50a6 6 0 1 1 12 0M62 44a5 5 0 1 1 10 0" /></svg>;
   if (cat === "Essências") return <svg {...c}><path {...s} d="M60 36c8 14 14 20 14 30a14 14 0 0 1-28 0c0-10 6-16 14-30z" /></svg>;
-  if (cat === "Afetos & Cartões") return <svg {...c}><path {...s} d="M60 86s-22-13-22-29a12 12 0 0 1 22-7 12 12 0 0 1 22 7c0 16-22 29-22 29z" /></svg>;
-  if (cat === "Bem-estar") return <svg {...c}><path {...s} d="M60 90c0-26 8-44 28-52-2 24-12 42-28 52z" /><path {...s} d="M60 90C44 80 36 62 34 40c14 6 22 18 26 34" /></svg>;
-  if (cat === "Atacado") return <svg {...c}><path {...s} d="M40 54l20-10 20 10-20 10z" /><path {...s} d="M40 54v22l20 10 20-10V54" /><path {...s} d="M60 64v22" /></svg>;
+  if (cat === "Afetos" || cat === "Namorados") return <svg {...c}><path {...s} d="M60 86s-22-13-22-29a12 12 0 0 1 22-7 12 12 0 0 1 22 7c0 16-22 29-22 29z" /></svg>;
+  if (cat === "Acessórios") return <svg {...c}><path {...s} d="M60 90c0-26 8-44 28-52-2 24-12 42-28 52z" /><path {...s} d="M60 90C44 80 36 62 34 40c14 6 22 18 26 34" /></svg>;
+  if (cat === "Corporativo e Eventos" || cat === "Kits") return <svg {...c}><path {...s} d="M40 54l20-10 20 10-20 10z" /><path {...s} d="M40 54v22l20 10 20-10V54" /><path {...s} d="M60 64v22" /></svg>;
   return <svg {...c}><rect {...s} x="48" y="56" width="24" height="38" rx="3" /><path {...s} d="M60 56v-8" /><path {...s} d="M60 48c0-6-5-7-5-12 0 0 5 2 5 8 0-6 5-8 5-8 0 5-5 6-5 12z" /></svg>;
 }
 
@@ -50,16 +56,17 @@ export default function Storefront({ products }: { products: Product[] }) {
   const [query, setQuery] = useState("");
   const [fragrance, setFragrance] = useState("Todas");
   const [priceIdx, setPriceIdx] = useState(0);
+  const [menu, setMenu] = useState<null | "frag" | "col">(null);
 
-  const fragrances = useMemo(() => {
-    const set = new Set<string>();
-    products.forEach((p) => { if (p.fr) set.add(p.fr); });
-    return Array.from(set).sort();
-  }, [products]);
+  const fragrances = NAV_FRAGRANCES;
 
   const list = useMemo(() => {
-    // "Todos" mostra tudo menos atacado; atacado só aparece ao clicar na categoria Atacado
-    let r = cat === "Todos" ? products.filter((p) => !p.w) : products.filter((p) => p.c === cat);
+    // "Todos" mostra tudo menos volume/atacado; Corporativo e Eventos mostra só eles.
+    // "Ofertas" mostra produtos com preço "de" maior que o preço atual, como o /sale/ do site.
+    let r: Product[];
+    if (cat === "Todos") r = products.filter((p) => !p.w && p.c !== WHOLESALE_CAT);
+    else if (cat === "Ofertas") r = products.filter((p) => (p.cmp ?? 0) > p.p);
+    else r = products.filter((p) => p.c === cat);
     const term = query.trim().toLowerCase();
     if (term) r = r.filter((p) => p.n.toLowerCase().includes(term) || (p.fr ?? "").toLowerCase().includes(term));
     if (fragrance !== "Todas") r = r.filter((p) => p.fr === fragrance);
@@ -145,7 +152,33 @@ export default function Storefront({ products }: { products: Product[] }) {
         <button className="icon-btn only-mobile" onClick={() => setCartOpen(true)} aria-label="menu"><Menu size={20} /></button>
         <img src="/logo.png" alt="Essentiale Fragrance" className="logo-img" />
         <nav className="nav-main">
-          {NAV.map((x) => <button key={x} className={`navlink ${cat === x ? "on" : ""}`} onClick={() => goCat(x)}>{x}</button>)}
+          {NAV_SIMPLE_1.map((x) => <button key={x} className={`navlink ${cat === x ? "on" : ""}`} onClick={() => { setMenu(null); goCat(x); }}>{x}</button>)}
+          <div className="nav-drop">
+            <button className={`navlink ${fragrance !== "Todas" ? "on" : ""}`} onClick={() => setMenu(menu === "frag" ? null : "frag")}>
+              Fragrâncias <ChevronDown size={13} />
+            </button>
+            {menu === "frag" && (
+              <div className="drop-panel cols">
+                <button className="drop-item strong" onClick={() => { setFragrance("Todas"); setMenu(null); goCat("Todos"); }}>Ver tudo em Fragrâncias</button>
+                {NAV_FRAGRANCES.map((f) => (
+                  <button key={f} className={`drop-item ${fragrance === f ? "on" : ""}`} onClick={() => { setFragrance(f); setMenu(null); goCat("Todos"); }}>{f}</button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="nav-drop">
+            <button className={`navlink ${NAV_COLECOES.includes(cat) ? "on" : ""}`} onClick={() => setMenu(menu === "col" ? null : "col")}>
+              Coleções <ChevronDown size={13} />
+            </button>
+            {menu === "col" && (
+              <div className="drop-panel">
+                {NAV_COLECOES.map((x) => (
+                  <button key={x} className={`drop-item ${cat === x ? "on" : ""}`} onClick={() => { setMenu(null); goCat(x); }}>{x}</button>
+                ))}
+              </div>
+            )}
+          </div>
+          {NAV_SIMPLE_2.map((x) => <button key={x} className={`navlink ${cat === x ? "on" : ""}`} onClick={() => { setMenu(null); goCat(x); }}>{x}</button>)}
         </nav>
         <div className="hdr-icons">
           <button className="icon-btn" aria-label="buscar" onClick={() => { document.getElementById("busca")?.focus(); document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }); }}><Search size={19} /></button>
@@ -162,15 +195,15 @@ export default function Storefront({ products }: { products: Product[] }) {
           <h1>Aromas que transformam<br />o seu dia em memória.</h1>
           <p>Velas, difusores e home sprays de fragrância autoral, com design minimalista e a sensação de cuidado em cada detalhe.</p>
           <div className="hero-cta">
-            <button className="btn" onClick={() => goCat("Velas Aromáticas")}>Ver coleção</button>
-            <button className="btn ghost" onClick={() => goCat("Afetos & Cartões")}>Presentear <ChevronRight size={16} /></button>
+            <button className="btn" onClick={() => goCat("Velas")}>Ver coleção</button>
+            <button className="btn ghost" onClick={() => goCat("Afetos")}>Presentear <ChevronRight size={16} /></button>
           </div>
         </div>
         <div className="hero-art">
-          <div className="hero-card c1"><Motif cat="Velas Aromáticas" /></div>
+          <div className="hero-card c1"><Motif cat="Velas" /></div>
           <div className="hero-card c2"><Motif cat="Difusores" /></div>
           <div className="hero-card c3"><Motif cat="Home Sprays" /></div>
-          <div className="hero-card c4"><Motif cat="Afetos & Cartões" /></div>
+          <div className="hero-card c4"><Motif cat="Afetos" /></div>
         </div>
       </section>
 

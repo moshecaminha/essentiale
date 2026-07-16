@@ -15,7 +15,7 @@ export default async function EditarProduto({ params }: { params: { id: string }
   if (!novo) {
     const { data } = await sb
       .from("products")
-      .select("id,name,slug,price_cents,compare_at_cents,stock_qty,low_stock_threshold,description,active,image_url,category_id,fragrance,is_wholesale")
+      .select("id,name,slug,price_cents,compare_at_cents,stock_qty,low_stock_threshold,description,active,image_url,category_id,fragrance,is_wholesale,cost_cents,sku,gtin,ncm,cest,cfop,origem,csosn,cst_icms,aliq_icms,aliq_pis,aliq_cofins,unidade,peso_gramas,altura_cm,largura_cm,profundidade_cm")
       .eq("id", params.id)
       .maybeSingle();
     product = data;
