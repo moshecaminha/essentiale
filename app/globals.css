@@ -600,3 +600,16 @@ small { font-size: 11.5px; }
 .intel-date { padding: 8px 0; border-bottom: 1px dashed var(--line, #e5e2da); }
 .intel-date:last-of-type { border-bottom: 0; }
 @media (max-width: 900px) { .intel-grid { grid-template-columns: 1fr; } .intel-item { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Combina com (página do produto) */
+.pdp-related { margin-top: 42px; }
+.rel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; }
+.rel-card { display: flex; flex-direction: column; border: 1px solid var(--line, #e5e2da); border-radius: 12px; overflow: hidden; text-decoration: none; color: inherit; transition: .15s; background: #fff; }
+.rel-card:hover { border-color: #5e7357; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(30,38,28,.08); }
+.rel-art { aspect-ratio: 1/1; background: #f2f0ea; }
+.rel-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.rel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+.rel-cat { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted, #7a7f74); }
+.rel-name { font-size: 14px; line-height: 1.35; }
+.rel-price { font-size: 14px; font-weight: 600; color: #5e7357; margin-top: 3px; }
+@media (max-width: 700px) { .rel-grid { grid-template-columns: 1fr; } }

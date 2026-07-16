@@ -3,6 +3,7 @@ import { ArrowLeft, MessageCircle, Truck, ShieldCheck, Heart, Quote } from "luci
 import { waLink, occasionsFor, testimonialsFor } from "@/lib/merch";
 import AccountMenu from "@/components/AccountMenu";
 import BuyNowButton from "@/components/BuyNowButton";
+import type { RelatedItem } from "@/lib/related";
 
 type P = {
   id: string; name: string; slug: string; price_cents: number; stock_qty: number;
@@ -12,7 +13,7 @@ type P = {
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 const parcela = (p: number) => p >= 6000 ? `ou 3x de ${brl(p / 3)} sem juros` : p >= 3000 ? `ou 2x de ${brl(p / 2)} sem juros` : "à vista no Pix";
 
-export default function ProductDetail({ p }: { p: P }) {
+export default function ProductDetail({ p, related = [] }: { p: P; related?: RelatedItem[] }) {
   const out = p.stock_qty === 0;
   const cat = p.category?.name ?? "Essentiale";
   const occasions = occasionsFor({ name: p.name, category: cat });
@@ -66,6 +67,27 @@ export default function ProductDetail({ p }: { p: P }) {
             </div>
           </div>
         </div>
+
+        {related.length > 0 && (
+          <section className="pdp-related">
+            <div className="depos-head">
+              <span className="eyebrow">Cross-sell inteligente</span>
+              <h2>Combina com {p.name}</h2>
+            </div>
+            <div className="rel-grid">
+              {related.map((r) => (
+                <Link href={`/produto/${r.slug}`} className="rel-card" key={r.id}>
+                  <div className={`rel-art ${r.img ? "has-img" : ""}`}>{r.img && <img src={r.img} alt={r.n} loading="lazy" />}</div>
+                  <div className="rel-body">
+                    <span className="rel-cat">{r.c}{r.fr ? ` · ${r.fr}` : ""}</span>
+                    <strong className="rel-name">{r.n}</strong>
+                    <span className="rel-price">{brl(r.p)}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="depos">
           <div className="depos-head">

@@ -8,11 +8,12 @@ import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import { readCart, writeCart, clearCart, CartLine } from "@/lib/cart";
 import { track } from "@/lib/track";
 import { placeOrder } from "./actions";
+import { suggestRelated } from "@/lib/related";
 import AccountMenu from "@/components/AccountMenu";
 
 const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
 
-type Prod = { id: string; n: string; c: string; p: number; s: number; img: string | null };
+type Prod = { id: string; n: string; c: string; p: number; s: number; img: string | null; fr?: string | null };
 type Addr = { id: string; label: string | null; cep: string | null; street: string | null; number: string | null; complement: string | null; district: string | null; city: string | null; uf: string | null; is_default: boolean };
 
 export default function Checkout() {
@@ -83,8 +84,15 @@ export default function Checkout() {
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cepAtual, JSON.stringify(cart.map((c) => ({ id: c.id, qty: c.qty })))]);
-  const inCart = new Set(cart.map((c) => c.id));
-  const suggestions = products.filter((p) => !inCart.has(p.id) && p.s > 0).slice(0, 3);
+  // Sugestões por afinidade com os itens do carrinho (fragrância, categoria complementar, faixa de preço)
+  const ctxItems = cart
+    .map((l) => products.find((p) => p.id === l.id))
+    .filter(Boolean)
+    .map((p) => ({ id: p!.id, n: p!.n, c: p!.c, p: p!.p, s: p!.s, fr: p!.fr }));
+  const suggestions = (ctxItems.length
+    ? suggestRelated(ctxItems, products.map((p) => ({ id: p.id, n: p.n, c: p.c, p: p.p, s: p.s, fr: p.fr })), 3)
+    : products.filter((p) => p.s > 0).slice(0, 3)
+  ).map((s) => products.find((p) => p.id === s.id)!).filter(Boolean);
 
   const addSuggestion = (p: Prod) => {
     const nc = [...cart];

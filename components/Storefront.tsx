@@ -7,6 +7,7 @@ import { waLink, WHATSAPP } from "@/lib/merch";
 import { readCart, writeCart, CartLine } from "@/lib/cart";
 import AccountMenu from "@/components/AccountMenu";
 import { track } from "@/lib/track";
+import { suggestRelated } from "@/lib/related";
 import {
   Search, ShoppingBag, Menu, X, Plus, Minus,
   Truck, ShieldCheck, Heart, Instagram, MessageCircle, ChevronRight, ChevronDown,
@@ -116,10 +117,16 @@ export default function Storefront({ products }: { products: Product[] }) {
   const discount = items.reduce((s, i) => s + (deals[i.id] ? i.p * i.q * 0.05 : 0), 0);
   const total = subtotal - discount;
 
-  // Sugestões de cross-sell: produtos mais baratos ainda não no carrinho
+  // Sugestões de cross-sell por afinidade: mesma fragrância dos itens do carrinho,
+  // categorias complementares e faixa de preço compatível (lib/related)
   const suggestions = useMemo(() => {
-    const inCart = new Set(Object.keys(cart));
-    return products.filter((p) => !inCart.has(p.id) && p.s > 0).sort((a, b) => a.p - b.p).slice(0, 3);
+    const ctx = Object.keys(cart)
+      .map((id) => products.find((p) => p.id === id))
+      .filter(Boolean)
+      .map((p) => ({ id: p!.id, n: p!.n, c: p!.c, p: p!.p, s: p!.s, fr: p!.fr }));
+    const cands = products.map((p) => ({ id: p.id, n: p.n, c: p.c, p: p.p, s: p.s, fr: p.fr, img: p.img, slug: p.slug }));
+    if (ctx.length === 0) return cands.filter((c) => c.s > 0).sort((a, b) => a.p - b.p).slice(0, 3).map((c) => products.find((p) => p.id === c.id)!);
+    return suggestRelated(ctx, cands, 3).map((c) => products.find((p) => p.id === c.id)!);
   }, [cart, products]);
 
   const goCat = (c: string) => { setCat(c); document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth" }); };
