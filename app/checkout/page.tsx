@@ -28,6 +28,13 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
+  // Frete (Melhor Envio)
+  type Freight = { serviceId: number; name: string; company: string; priceCents: number; days: number };
+  const [freightCfg, setFreightCfg] = useState<boolean | null>(null); // null = ainda não consultou
+  const [freights, setFreights] = useState<Freight[]>([]);
+  const [freightSel, setFreightSel] = useState<number | null>(null);
+  const [freightLoading, setFreightLoading] = useState(false);
+
   useEffect(() => {
     setCart(readCart());
     supabaseBrowser().auth.getUser().then(({ data }) => setUser(data.user ?? null));
@@ -41,7 +48,41 @@ export default function Checkout() {
   }, []);
 
   const unit = (i: CartLine) => (i.deal ? Math.round(i.p * 0.95) : i.p);
-  const total = cart.reduce((s, i) => s + unit(i) * i.qty, 0);
+  const subtotal = cart.reduce((s, i) => s + unit(i) * i.qty, 0);
+  const freightChosen = freights.find((f) => f.serviceId === freightSel) ?? null;
+  const total = subtotal + (freightChosen?.priceCents ?? 0);
+
+  // CEP em uso: do endereço salvo selecionado, ou do formulário de novo endereço
+  const cepAtual = (() => {
+    if (selectedId && selectedId !== "new") {
+      const x = addresses.find((z) => z.id === selectedId);
+      return (x?.cep ?? "").replace(/\D/g, "");
+    }
+    return a.cep.replace(/\D/g, "");
+  })();
+
+  useEffect(() => {
+    if (cepAtual.length !== 8 || cart.length === 0) { setFreights([]); setFreightSel(null); return; }
+    let alive = true;
+    setFreightLoading(true);
+    fetch("/api/shipping/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cep: cepAtual, items: cart.map((c) => ({ id: c.id, qty: c.qty })) }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!alive) return;
+        setFreightCfg(Boolean(d.configured));
+        const opts: Freight[] = d.options || [];
+        setFreights(opts);
+        setFreightSel(opts.length ? opts[0].serviceId : null);
+      })
+      .catch(() => { if (alive) { setFreights([]); setFreightSel(null); } })
+      .finally(() => { if (alive) setFreightLoading(false); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cepAtual, JSON.stringify(cart.map((c) => ({ id: c.id, qty: c.qty })))]);
   const inCart = new Set(cart.map((c) => c.id));
   const suggestions = products.filter((p) => !inCart.has(p.id) && p.s > 0).slice(0, 3);
 
@@ -71,7 +112,7 @@ export default function Checkout() {
     const addr = (selectedId && selectedId !== "new")
       ? { id: selectedId, cep: "", street: "", number: "", complement: "", district: "", city: "", uf: "", phone: a.phone }
       : { ...a, label };
-    const res = await placeOrder(cart.map((c) => ({ id: c.id, qty: c.qty, deal: c.deal })), addr, method);
+    const res = await placeOrder(cart.map((c) => ({ id: c.id, qty: c.qty, deal: c.deal })), addr, method, freightSel);
     setLoading(false);
     if (res.ok && res.orderId) {
       track("purchase", { valueCents: total, cart, meta: { orderId: res.orderId } });
@@ -88,7 +129,33 @@ export default function Checkout() {
       {cart.map((i) => (
         <div className="sum-row" key={i.id}><span>{i.qty}x {i.n}{i.deal ? " (-5%)" : ""}</span><span>{brl(unit(i) * i.qty)}</span></div>
       ))}
-      <div className="sum-row total"><strong>Total</strong><strong>{brl(total)}</strong></div>
+      <div className="sum-row"><span>Subtotal</span><span>{brl(subtotal)}</span></div>
+
+      {cepAtual.length === 8 && (
+        <div className="freight-box">
+          <div className="freight-title">Frete para {cepAtual.slice(0, 5)}-{cepAtual.slice(5)}</div>
+          {freightLoading ? (
+            <p className="cell-muted" style={{ fontSize: 12.5, margin: 0 }}>Calculando frete…</p>
+          ) : freights.length > 0 ? (
+            freights.map((f) => (
+              <label className={`freight-opt ${freightSel === f.serviceId ? "on" : ""}`} key={f.serviceId}>
+                <input type="radio" name="freight" checked={freightSel === f.serviceId} onChange={() => setFreightSel(f.serviceId)} />
+                <span className="freight-name">{f.company} {f.name}</span>
+                <span className="freight-days">{f.days ? `até ${f.days} dias úteis` : ""}</span>
+                <span className="freight-price">{brl(f.priceCents)}</span>
+              </label>
+            ))
+          ) : (
+            <p className="cell-muted" style={{ fontSize: 12.5, margin: 0 }}>
+              {freightCfg === false
+                ? "O frete será combinado pelo WhatsApp após o pedido."
+                : "Não foi possível calcular o frete para este CEP. Ele será combinado pelo WhatsApp após o pedido."}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="sum-row total"><strong>Total{freightChosen ? "" : " (sem frete)"}</strong><strong>{brl(total)}</strong></div>
       {suggestions.length > 0 && (
         <div className="xsell" style={{ borderTop: "1px solid var(--line)", paddingLeft: 0, paddingRight: 0 }}>
           <div className="xsell-head">Leve também <span>5% OFF</span></div>
