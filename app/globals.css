@@ -585,3 +585,18 @@ small { font-size: 11.5px; }
 .freight-name { font-weight: 500; }
 .freight-days { font-size: 12px; color: var(--muted, #7a7f74); white-space: nowrap; }
 .freight-price { font-weight: 600; white-space: nowrap; }
+
+/* Inteligência */
+.intel-head { display: flex; align-items: center; gap: 8px; }
+.intel-list { display: flex; flex-direction: column; }
+.intel-item { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e5e2da); }
+.intel-item:last-child { border-bottom: 0; }
+.intel-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; background: rgba(94,115,87,.1); color: #5e7357; white-space: nowrap; }
+.intel-tag.warm { background: rgba(196,148,58,.14); color: #9a7328; }
+.intel-tag.hot { background: rgba(178,74,58,.12); color: #a4432f; }
+.intel-text { font-size: 13.5px; }
+.intel-actions { display: inline-flex; gap: 6px; white-space: nowrap; }
+.intel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.intel-date { padding: 8px 0; border-bottom: 1px dashed var(--line, #e5e2da); }
+.intel-date:last-of-type { border-bottom: 0; }
+@media (max-width: 900px) { .intel-grid { grid-template-columns: 1fr; } .intel-item { grid-template-columns: 1fr; gap: 6px; } }
